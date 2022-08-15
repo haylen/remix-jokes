@@ -9,10 +9,14 @@ export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
 };
 
-type LoaderData = {jokes: Array<Joke>}
+type LoaderData = {jokeListItems: Array<Pick<Joke, 'id' | 'name'>>}
 export const loader: LoaderFunction = async(): Promise<LoaderData> => {
-  const jokes = await db.joke.findMany();
-  return { jokes };
+  const jokeListItems = await db.joke.findMany({
+    take: 5,
+    select: { id: true, name: true },
+    orderBy: { createdAt: "desc" },
+  });
+  return { jokeListItems };
 }
 
 export default function JokesRoute() {
@@ -40,7 +44,7 @@ export default function JokesRoute() {
             <Link to=".">Get a random joke</Link>
             <p>Here are a few more jokes to check out:</p>
             <ul>
-              {data.jokes.map((joke) => (
+              {data.jokeListItems.map((joke) => (
                 <li key={joke.id}>
                   <Link to={joke.id}>{joke.name}</Link>
                 </li>
